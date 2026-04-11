@@ -6,8 +6,8 @@ var amiiboDatabase = [];
 var mainTable = null;
 var masterKeys = null; // Stores loaded maboii keys
 
-const TAGMO_SIG_HEX = "5461674d6f20382d426974204e544147"; 
-const DEFAULT_SIG_TEXT = "TagMo 8-Bit NTAG";
+const DEFAULT_SIG_HEX = "6769746875622e636f6d2f4c6974746c652d4e696768742d576f6c66"; 
+const DEFAULT_SIG_TEXT = "github.com/Little-Night-Wolf";
 
 // --- ENCRYPTION LOGIC ---
 
@@ -93,7 +93,7 @@ async function generateWumiiboData(idHex) {
     return await applyEncryption(arr);
 }
 
-async function generateFoomiiboData(idHex, uidBytes = null, sigText = null, noSignature = false) {
+async function generateamiiboData(idHex, uidBytes = null, sigText = null, noSignature = false) {
     const arr = new Uint8Array(572); 
     const cleanId = idHex.replace(/[^0-9A-Fa-f]/g, '').padEnd(16, '0');
     const idBytes = hexToBytes(cleanId);
@@ -122,7 +122,7 @@ async function generateFoomiiboData(idHex, uidBytes = null, sigText = null, noSi
     let finalArr = new Uint8Array(572);
     finalArr.set(encryptedBody);
     let finalSig = (!sigText || sigText === DEFAULT_SIG_TEXT) ? 
-                   hexToBytes(TAGMO_SIG_HEX) : textToUint8Array(sigText, 16);
+                   hexToBytes(DEFAULT_SIG_HEX) : textToUint8Array(sigText, 16);
     finalArr.set(finalSig, 540);
     return finalArr;
 }
@@ -167,7 +167,7 @@ window.clearKeys = function() {
 
 window.downloadSingle = async function(type, name, id) {
     try {
-        let data = (type === 'wumiibo') ? await generateWumiiboData(id) : await generateFoomiiboData(id);
+        let data = (type === 'wumiibo') ? await generateWumiiboData(id) : await generateamiiboData(id);
         let filename = name.replace(/[/\\?%*:|"<>]/g, '-');
         let state = masterKeys ? "ENC" : "DEC";
         download(new Blob([data]), `${filename}_${type}_${state}.bin`, "application/octet-stream");
@@ -180,7 +180,7 @@ window.generateZip = async function(type) {
     let state = masterKeys ? "ENC" : "DEC";
     
     for (const amiibo of amiiboDatabase) {
-        let data = (type === 'wumiibo') ? await generateWumiiboData(amiibo.id) : await generateFoomiiboData(amiibo.id);
+        let data = (type === 'wumiibo') ? await generateWumiiboData(amiibo.id) : await generateamiiboData(amiibo.id);
         let folder = zip.folder(amiibo.series || "Others");
         folder.file(`${amiibo.name} (${type}_${state}).bin`, data);
     }
@@ -197,9 +197,9 @@ window.downloadAdvanced = async function() {
     if (UID.length !== 18) { alert("UID must be 18 hex characters."); return; }
     
     try {
-        const data = await generateFoomiiboData(id, hexToBytes(UID), sigText, noSig);
+        const data = await generateamiiboData(id, hexToBytes(UID), sigText, noSig);
         let state = masterKeys ? "ENC" : "DEC";
-        download(new Blob([data]), `custom_foomiibo_${id}_${state}.bin`, "application/octet-stream");
+        download(new Blob([data]), `custom_amiibo_${id}_${state}.bin`, "application/octet-stream");
     } catch (e) { alert("Error processing advanced data."); }
 };
 
@@ -248,10 +248,10 @@ $(document).ready(async function() {
             const safeName = amiibo.name.replace(/'/g, "\\'");
             const actions = `
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-wumiibo" onclick="downloadSingle('wumiibo','${safeName}','${amiibo.id}')">Wumiibo</button>
+                    <!-- <button class="btn btn-sm btn-wumiibo" onclick="downloadSingle('wumiibo','${safeName}','${amiibo.id}')">Wumiibo</button> -->
                     <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-foomiibo" onclick="downloadSingle('foomiibo','${safeName}','${amiibo.id}')">Foomiibo</button>
-                        <button type="button" class="btn btn-sm btn-foomiibo dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
+                        <button type="button" class="btn btn-sm btn-amiibo" onclick="downloadSingle('amiibo','${safeName}','${amiibo.id}')">Amiibo</button>
+                        <button type="button" class="btn btn-sm btn-amiibo dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
                         <div class="dropdown-menu dropdown-menu-right" style="background-color: #2c2c2c;">
                             <a class="dropdown-item text-white" href="?id=${amiibo.id}">Advanced Mode</a>
                         </div>
@@ -280,7 +280,7 @@ $(document).ready(async function() {
 
         $(".hide_until_zipped").show();
         $("#downloadWumiiboZip").on("click", () => generateZip('wumiibo'));
-        $("#downloadFoomiiboZip").on("click", () => generateZip('foomiibo'));
+        $("#downloadamiiboZip").on("click", () => generateZip('amiibo'));
 
     } catch (err) { console.error("Loading error:", err); }
 });
