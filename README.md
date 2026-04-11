@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Platform: Web](https://img.shields.io/badge/Platform-Web-blue.svg)](https://little-night-wolf.github.io/amiibo-generator/)
-[![Version](https://img.shields.io/badge/Version-1.2.0-red.svg)]
+[![Version](https://img.shields.io/badge/Version-1.2.0-red.svg)
 
 **Amiibo Generator Pro** is a high-performance web tool designed to generate binary files (.bin) compatible with NFC figure emulators and management tools. It allows for the creation of custom dumps for both the **Wumiibo (Nintendo 3DS)** ecosystem and the **Foomiibo/TagMo (NTAG215 standard)** format.
 
