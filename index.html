@@ -20,10 +20,10 @@
         .amiibo-image img { max-height: 128px; max-width: 128px; border-radius: 4px; background: #333; }
         .hide_until_zipped { display: none; }
         .badge-group { font-size: 0.85em; padding: 5px 10px; font-weight: bold; text-transform: uppercase; }
-        #advancedMode { display: none; background: #2c2c2c; padding: 30px; border-radius: 15px; border: 2px solid #e60012; margin-bottom: 30px; }
+        #advancedMode, #encryptorMode { display: none; background: #2c2c2c; padding: 30px; border-radius: 15px; border: 2px solid #e60012; margin-bottom: 30px; }
+        #encryptorMode { border-color: #17a2b8; }
         select { border: 1px solid #333 !important; background-color: #121212 !important; color: #fff !important;}
         .dropdown-item:hover { background-color: #444; color: #fff; }
-        /* Estilo para el estado de las llaves */
         .key-panel { background: #2c2c2c; border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
     </style>
 
@@ -40,12 +40,17 @@
         <div class="row mb-3">
             <div class="col-sm-12">
                 <div class="key-panel">
-                    <h6 class="text-muted small">ENCRYPTION SETTINGS</h6>
-                    <div class="d-flex align-items-center">
+                    <h6 class="text-muted small">ENCRYPTION SETTINGS & TOOLS</h6>
+                    <div class="d-flex align-items-center flex-wrap">
                         <span id="keyStatus" class="badge badge-danger mr-3">Keys missing: Downloads will be decrypted</span>
                         <input type="file" id="keyFileInput" accept=".bin" style="display: none;">
                         <button class="btn btn-sm btn-outline-info" onclick="document.getElementById('keyFileInput').click()">Load key_retail.bin</button>
                         <button id="clearKeysBtn" class="btn btn-sm btn-outline-warning ml-2" style="display:none;" onclick="clearKeys()">Clear Keys</button>
+                        
+                        <div class="ml-auto">
+                            <a href="?tool=advanced" class="btn btn-sm btn-danger">Advanced Generator</a>
+                            <a href="?tool=encryptor" class="btn btn-sm btn-info ml-2">Amiibo Encryptor</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -56,7 +61,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <label>Amiibo ID:</label>
-                    <input type="text" id="advId" class="form-control inputBox mb-3">
+                    <input type="text" id="advId" class="form-control inputBox mb-3" placeholder="AABBCCDD00112233">
                     
                     <label>UID (9 bytes hex):</label>
                     <div class="input-group mb-3">
@@ -77,7 +82,21 @@
                     </div>
 
                     <button class="btn btn-danger btn-block" onclick="downloadAdvanced()">Download amiibo .bin</button>
-                    <a href="/amiibo-generator" class="btn btn-link text-white mt-2">← Back to List</a>
+                    <a href="?" class="btn btn-link text-white mt-2">← Back to List</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="encryptorMode">
+            <h2 class="text-info">Amiibo File Encryptor</h2>
+            <p class="small text-muted">Upload a decrypted .bin file to encrypt it using your loaded key_retail.bin</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <label>Select Decrypted Amiibo (.bin):</label>
+                    <input type="file" id="encryptFileInput" accept=".bin" class="form-control-file mb-3 text-white">
+                    
+                    <button class="btn btn-info btn-block" onclick="processManualEncryption()">Encrypt & Download</button>
+                    <a href="?" class="btn btn-link text-white mt-2">← Back to List</a>
                 </div>
             </div>
         </div>
@@ -87,7 +106,6 @@
                 <div class="col-sm-12">
                     <h2 class="mb-1">Amiibo Generator Pro</h2>
                     <div class="hide_until_zipped">
-                        <!-- <button id="downloadWumiiboZip" class="btn btn-sm btn-primary">Download All (Wumiibo ZIP)</button> -->
                         <button id="downloadamiiboZip" class="btn btn-sm btn-danger ml-2">Download All (amiibo ZIP)</button>
                     </div>
                 </div>
