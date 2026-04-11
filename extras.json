@@ -1,0 +1,26 @@
+{
+  "amiibo": [
+    {
+      "amiiboSeries": "Legend of Zelda",
+      "character": "Mineru",
+      "gameSeries": "The Legend of Zelda",
+      "head": "010D0000",
+      "tail": "04A70902",
+      "image": "https://amiibo.life/assets/figures/amiibo/the-legend-of-zelda/mineru-s-construct-97ed7d1010558ea1449e71e89499ce1845c5f4d9884728a6b17384cf30a2d2de.png",
+      "name": "Mineru's Construct",
+      "type": "Figure",
+      "customGroup": "Leaked"
+    },
+    {
+      "amiiboSeries": "TEST",
+      "character": "TEST",
+      "gameSeries": "TEST",
+      "head": "00000000",
+      "tail": "00000000",
+      "image": "",
+      "name": "TEST",
+      "type": "TEST",
+      "customGroup": "TEST"
+    }
+  ]
+}
