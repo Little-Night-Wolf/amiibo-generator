@@ -81,6 +81,12 @@ function generateRandomUID() {
     return uid;
 }
 
+window.generateNewAdvUID = function() {
+    const uid = generateRandomUID();
+    const hex = Array.from(uid).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+    document.getElementById('advUID').value = hex;
+};
+
 // --- DATA GENERATION (Asynchronous) ---
 
 async function generateWumiiboData(idHex) {
@@ -203,6 +209,42 @@ window.downloadAdvanced = async function() {
     } catch (e) { alert("Error processing advanced data."); }
 };
 
+// --- MANUAL ENCRYPTION TOOL LOGIC ---
+
+window.processManualEncryption = async function() {
+    const fileInput = document.getElementById('encryptFileInput');
+    if (!fileInput.files.length) { alert("Please select a .bin file first."); return; }
+    if (!masterKeys) { alert("Please load key_retail.bin first!"); return; }
+
+    const file = fileInput.files[0];
+    const buffer = await file.arrayBuffer();
+    const decryptedData = new Uint8Array(buffer);
+
+    if (decryptedData.length < 520) {
+        alert("Invalid file size. This doesn't look like an amiibo dump.");
+        return;
+    }
+
+    try {
+        // Use the existing encryption logic on the first 540 bytes
+        const encryptedBody = await applyEncryption(decryptedData.slice(0, 540));
+        
+        let finalData = encryptedBody;
+        // If the original file had extra data (like a signature), preserve it
+        if (decryptedData.length > 540) {
+            finalData = new Uint8Array(decryptedData.length);
+            finalData.set(encryptedBody);
+            finalData.set(decryptedData.slice(540), 540);
+        }
+
+        const originalName = file.name.split('.').slice(0, -1).join('.');
+        download(new Blob([finalData]), `${originalName}_ENC.bin`, "application/octet-stream");
+    } catch (e) {
+        alert("Encryption failed. Check your keys or file format.");
+        console.error(e);
+    }
+};
+
 // --- INITIALIZATION ---
 
 $(document).ready(async function() {
@@ -220,13 +262,27 @@ $(document).ready(async function() {
         order: [[1, 'asc']]
     });
 
+    // Handle routing and tool selection
     const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('id')) {
+    const tool = urlParams.get('tool');
+    const amiiboId = urlParams.get('id');
+
+    if (tool === 'advanced' || amiiboId) {
         $("#mainContent").hide();
+        $("#encryptorMode").hide();
         $("#advancedMode").show();
-        document.getElementById('advId').value = urlParams.get('id').toUpperCase();
+        if (amiiboId) {
+            document.getElementById('advId').value = amiiboId.toUpperCase();
+        } else {
+            document.getElementById('advId').value = ""; // Manual entry
+        }
         document.getElementById('advSig').value = DEFAULT_SIG_TEXT;
         generateNewAdvUID();
+    } 
+    else if (tool === 'encryptor') {
+        $("#mainContent").hide();
+        $("#advancedMode").hide();
+        $("#encryptorMode").show();
     }
 
     try {
@@ -248,7 +304,6 @@ $(document).ready(async function() {
             const safeName = amiibo.name.replace(/'/g, "\\'");
             const actions = `
                 <div class="btn-group">
-                    <!-- <button class="btn btn-sm btn-wumiibo" onclick="downloadSingle('wumiibo','${safeName}','${amiibo.id}')">Wumiibo</button> -->
                     <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-amiibo" onclick="downloadSingle('amiibo','${safeName}','${amiibo.id}')">Amiibo</button>
                         <button type="button" class="btn btn-sm btn-amiibo dropdown-toggle dropdown-toggle-split" data-toggle="dropdown"></button>
@@ -279,7 +334,6 @@ $(document).ready(async function() {
         $('#filterSeries').on('change', function() { mainTable.column(3).search(this.value).draw(); });
 
         $(".hide_until_zipped").show();
-        $("#downloadWumiiboZip").on("click", () => generateZip('wumiibo'));
         $("#downloadamiiboZip").on("click", () => generateZip('amiibo'));
 
     } catch (err) { console.error("Loading error:", err); }
