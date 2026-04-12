@@ -55,6 +55,7 @@ If you don't provide this tool a working `key_retail.bin` files will be **unencr
 * `index.html`: Bootstrapped UI with DataTables for lightning-fast character searching.
 * `script.js`: The core engine. Handles Hex-to-Bytes conversion, BCC calculation, and ZIP generation.
 * `extras.json`: Local database for custom entries and early-access Amiibo data.
+* `maboii.js`: A JavaScrypt compiled version of original [maboii.js](https://github.com/Entrivax/maboii.js) library (Original by [Entrivax](https://github.com/Entrivax) in TypeScript) converted and adapted by [christopher-roelofs](https://github.com/christopher-roelofs)
 
 ---
 
