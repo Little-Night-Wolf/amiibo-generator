@@ -274,7 +274,7 @@ $(document).ready(async function() {
         if (amiiboId) {
             document.getElementById('advId').value = amiiboId.toUpperCase();
         } else {
-            document.getElementById('advId').value = ""; 
+            document.getElementById('advId').value = ""; // Manual entry
         }
         document.getElementById('advSig').value = DEFAULT_SIG_TEXT;
         generateNewAdvUID();
@@ -286,13 +286,13 @@ $(document).ready(async function() {
     }
 
     try {
-        // Cargamos ambas fuentes de datos simultáneamente
+        // Fetch data from both API and local extras.json simultaneously
         const [apiRes, extraRes] = await Promise.all([
             fetch("https://amiiboapi.org/api/amiibo/").then(r => r.json()).catch(() => ({ amiibo: [] })),
             fetch("extras.json").then(r => r.json()).catch(() => ({ amiibo: [] }))
         ]);
 
-        // Combinamos los datos de la API
+        // Map official API data
         const apiData = apiRes.amiibo.map(ami => ({
             id: (ami.head + ami.tail).toUpperCase(),
             name: ami.name,
@@ -303,8 +303,8 @@ $(document).ready(async function() {
             image: ami.image
         }));
 
-        // Combinamos los datos de Extras (usando customGroup si existe)
-        const extraData = extraRes.amiibo.map(ami => ({
+        // Map local extra data
+        const extraData = (extraRes.amiibo || []).map(ami => ({
             id: (ami.head + ami.tail).toUpperCase(),
             name: ami.name,
             series: ami.amiiboSeries,
@@ -314,9 +314,10 @@ $(document).ready(async function() {
             image: ami.image || ""
         }));
 
-        // Base de datos final unificada
+        // Merge both databases
         amiiboDatabase = [...apiData, ...extraData];
 
+        // Populate DataTable
         amiiboDatabase.forEach(amiibo => {
             const safeName = amiibo.name.replace(/'/g, "\\'");
             const actions = `
@@ -343,18 +344,39 @@ $(document).ready(async function() {
         });
         mainTable.draw();
 
-        // Actualizar filtros
+        // --- FILTERS SETUP ---
+
+        // Setup Series Filter
         const series = [...new Set(amiiboDatabase.map(a => a.series))].sort();
-        $('#filterSeries').empty().append(new Option("All", ""));
+        $('#filterSeries').empty().append(new Option("All Series", ""));
         series.forEach(s => $('#filterSeries').append(new Option(s, s)));
 
-        $('#input').on('keyup', function() { mainTable.search(this.value).draw(); });
-        $('#filterSeries').on('change', function() { mainTable.column(3).search(this.value).draw(); });
+        // Setup Group Filter (Fix for missing groups)
+        const groups = [...new Set(amiiboDatabase.map(a => a.group))].sort();
+        $('#filterGroup').empty().append(new Option("All Groups", ""));
+        groups.forEach(g => $('#filterGroup').append(new Option(g, g)));
+
+        // --- EVENT HANDLERS ---
+
+        // Search bar
+        $('#input').on('keyup', function() { 
+            mainTable.search(this.value).draw(); 
+        });
+
+        // Series dropdown (Column 3)
+        $('#filterSeries').on('change', function() { 
+            mainTable.column(3).search(this.value).draw(); 
+        });
+
+        // Group dropdown (Column 4)
+        $('#filterGroup').on('change', function() { 
+            mainTable.column(4).search(this.value).draw(); 
+        });
 
         $(".hide_until_zipped").show();
         $("#downloadamiiboZip").off("click").on("click", () => generateZip('amiibo'));
 
     } catch (err) { 
-        console.error("Loading error:", err); 
+        console.error("Initialization error:", err); 
     }
 });
