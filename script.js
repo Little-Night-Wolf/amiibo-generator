@@ -245,6 +245,113 @@ window.processManualEncryption = async function() {
     }
 };
 
+// --- NUEVA FUNCIÓN: ANALIZADOR/EXTRACTOR DE AMIIBOS ---
+
+window.processAnalyzer = async function() {
+    const fileInput = document.getElementById('analyzeFileInput');
+    if (!fileInput.files.length) { alert("Por favor, selecciona un archivo .bin primero."); return; }
+
+    const file = fileInput.files[0];
+    const buffer = await file.arrayBuffer();
+    let data = new Uint8Array(buffer);
+
+    if (data.length < 520) {
+        alert("El archivo es demasiado pequeño para ser un binario válido de Amiibo.");
+        return;
+    }
+
+    let isEncrypted = false;
+    let unpackedData = data;
+
+    // 1. Detectar e intentar desencriptar
+    if (masterKeys) {
+        try {
+            // Intentamos usar la función unpack de maboii
+            const unpackedArray = await maboii.unpack(masterKeys, Array.from(data.slice(0, 540)));
+            unpackedData = new Uint8Array(unpackedArray);
+            isEncrypted = true;
+        } catch (e) {
+            console.log("No se pudo desencriptar. Asumiendo que ya estaba desencriptado o claves inválidas.", e);
+        }
+    } else {
+        // Verificación básica si no hay claves
+        if (data[1] !== 0x48 && data[2] !== 0x0F) {
+            alert("⚠️ El archivo parece estar encriptado pero NO has cargado tus claves (key_retail.bin). Los datos extraídos serán basura o incorrectos.");
+        }
+    }
+
+    // 2. Extraer Amiibo ID (16 caracteres hex)
+    // El ID suele estar almacenado en el offset 0x1DC en los datos desencriptados internos (8 bytes)
+    let idHex = "";
+    for (let i = 0; i < 8; i++) {
+        idHex += unpackedData[0x1DC + i].toString(16).padStart(2, '0');
+    }
+
+    // 3. Extraer UID interno (9 bytes)
+    // Normalmente guardado en el offset 0x1D4
+    let uidHex = "";
+    for (let i = 0; i < 9; i++) {
+        uidHex += unpackedData[0x1D4 + i].toString(16).padStart(2, '0');
+    }
+
+    // 4. Extraer Firma Personalizada (si existe, a partir del byte 540)
+    let signatureHex = "Ninguna";
+    let signatureText = "Ninguna";
+    
+    if (data.length >= 572) {
+        let sigBytes = data.slice(540, 572);
+        signatureHex = Array.from(sigBytes).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+        
+        // Intentar leer la firma como texto (filtrando caracteres no imprimibles)
+        let decoder = new TextDecoder("utf-8");
+        let decodedStr = decoder.decode(sigBytes);
+        // Limpiamos la string para mostrar solo texto legible
+        let cleanStr = decodedStr.replace(/[\x00-\x1F\x7F-\x9F]/g, "");
+        if (cleanStr.trim().length > 0) {
+            signatureText = cleanStr;
+        } else {
+            signatureText = "(Datos binarios irreconocibles como texto)";
+        }
+    } else if (data.length > 540) {
+        signatureHex = "Detectada (" + (data.length - 540) + " bytes extra)";
+    }
+
+    // 5. Actualizar la Interfaz de Usuario
+    document.getElementById('resStatus').innerHTML = isEncrypted 
+        ? '<span class="badge badge-warning">Encriptado (Desencriptado en memoria)</span>' 
+        : '<span class="badge badge-secondary">Ya desencriptado (o sin claves cargadas)</span>';
+    
+    document.getElementById('resID').innerText = idHex.toUpperCase();
+    document.getElementById('resUID').innerText = uidHex.toUpperCase();
+    document.getElementById('resSigHex').innerText = signatureHex;
+    document.getElementById('resSigText').innerText = signatureText;
+
+    // 6. Consultar la API para obtener imagen y nombre
+    try {
+        let apiRes = await fetch(`https://amiiboapi.org/api/amiibo/?id=${idHex.toLowerCase()}`);
+        if(apiRes.ok) {
+            let amiInfo = await apiRes.json();
+            if(amiInfo.amiibo) {
+                document.getElementById('resImage').src = amiInfo.amiibo.image;
+                document.getElementById('resName').innerText = amiInfo.amiibo.name;
+                document.getElementById('resSeries').innerText = amiInfo.amiibo.amiiboSeries;
+            }
+        } else {
+            // Si la API no lo encuentra
+            document.getElementById('resName').innerText = "Amiibo Desconocido / Personalizado";
+            document.getElementById('resImage').src = "https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg";
+            document.getElementById('resSeries').innerText = "---";
+        }
+    } catch(e) {
+        console.error("No se pudo conectar con amiiboapi.org", e);
+    }
+
+    // Mostrar caja de resultados
+    document.getElementById('resultBox').style.display = 'block';
+};
+
+// --- FIN NUEVA FUNCIÓN ---
+
 // --- INITIALIZATION ---
 
 $(document).ready(async function() {
@@ -267,9 +374,11 @@ $(document).ready(async function() {
     const tool = urlParams.get('tool');
     const amiiboId = urlParams.get('id');
 
+    // LOGICA DE VISIBILIDAD DE MENÚS ACTUALIZADA
     if (tool === 'advanced' || amiiboId) {
         $("#mainContent").hide();
         $("#encryptorMode").hide();
+        $("#analyzerMode").hide();
         $("#advancedMode").show();
         if (amiiboId) {
             document.getElementById('advId').value = amiiboId.toUpperCase();
@@ -282,7 +391,17 @@ $(document).ready(async function() {
     else if (tool === 'encryptor') {
         $("#mainContent").hide();
         $("#advancedMode").hide();
+        $("#analyzerMode").hide();
         $("#encryptorMode").show();
+    }
+    else if (tool === 'analyzer') {
+        $("#mainContent").hide();
+        $("#advancedMode").hide();
+        $("#encryptorMode").hide();
+        $("#analyzerMode").show();
+    } else {
+        // En la página principal
+        $("#analyzerMode").hide();
     }
 
     try {
