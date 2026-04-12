@@ -10,187 +10,291 @@
     <link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg">
     
     <style>
-        body { background-color: #1F2021; color: #FBF7F5; padding: 20px 0; }
-        input { background-color: #121212 !important; color: #fff !important; border-color: #333 !important; }
+        /* Base Variables & Theme */
+        :root { --bg-main: #1F2021; --bg-sec: #2c2c2c; --bg-input: #121212; --accent-red: #e60012; --accent-blue: #17a2b8; --accent-green: #28a745; --accent-purple: #9b59b6; }
+        body { background-color: var(--bg-main); color: #FBF7F5; padding: 20px 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        /* Inputs & Selects */
+        input, select { background-color: var(--bg-input) !important; color: #fff !important; border: 1px solid #444 !important; font-size: 0.9em !important; }
+        input:focus, select:focus { border-color: var(--accent-red) !important; box-shadow: none !important; }
+        .dropdown-item:hover { background-color: #444; color: #fff; }
+        
+        /* Custom Buttons */
         .btn-wumiibo { background-color: #375a7f; color: white; border: none; }
         .btn-wumiibo:hover { background-color: #2b4764; }
-        .btn-amiibo { background-color: #e60012; color: white; border: none; }
+        .btn-amiibo { background-color: var(--accent-red); color: white; border: none; }
         .btn-amiibo:hover { background-color: #b3000e; }
-        .btn-advanced { background-color: #444; color: white; }
-        .amiibo-image img { max-height: 128px; max-width: 128px; border-radius: 4px; background: #333; }
-        .hide_until_zipped { display: none; }
-        .badge-group { font-size: 0.85em; padding: 5px 10px; font-weight: bold; text-transform: uppercase; }
         
-        /* Modificado para incluir el analyzerMode */
-        #advancedMode, #encryptorMode, #analyzerMode { display: none; background: #2c2c2c; padding: 30px; border-radius: 15px; border: 2px solid #e60012; margin-bottom: 30px; }
-        #encryptorMode { border-color: #17a2b8; }
-        #analyzerMode { border-color: #28a745; } /* Color verde para el analizador */
+        /* Layout & Panels */
+        .key-panel { background: var(--bg-sec); border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .tool-section { display: none; background: var(--bg-sec); padding: 30px; border-radius: 12px; margin-bottom: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
         
-        select { border: 1px solid #333 !important; background-color: #121212 !important; color: #fff !important;}
-        .dropdown-item:hover { background-color: #444; color: #fff; }
-        .key-panel { background: #2c2c2c; border: 1px solid #444; border-radius: 8px; padding: 15px; margin-bottom: 20px; }
+        /* Tool Specific Borders */
+        #advancedMode { border-top: 4px solid var(--accent-red); }
+        #encryptorMode { border-top: 4px solid var(--accent-blue); }
+        #analyzerMode { border-top: 4px solid var(--accent-green); }
         
-        /* Estilos específicos para la caja de resultados del analizador */
-        .result-box { background-color: #121212; border: 1px solid #444; border-radius: 8px; padding: 20px; margin-top: 20px; display: none; }
-        .data-label { color: #888; font-size: 0.85em; text-transform: uppercase; margin-bottom: 2px; }
-        .data-value { font-family: monospace; font-size: 1.1em; color: #17a2b8; margin-bottom: 15px; word-break: break-all; }
-        .analyzer-preview img { max-height: 128px; max-width: 128px; border-radius: 8px; background: #333; margin-bottom: 10px; }
-    </style>
+        /* UI Elements */
+        .amiibo-image img, .analyzer-preview img { max-height: 128px; max-width: 128px; border-radius: 8px; background: #333; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
+        .badge-origin { font-size: 0.85em; padding: 5px 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .type-icon { font-size: 0.8em; vertical-align: middle; margin-right: 4px; color: #aaa; }
+        
+        /* Results Box */
+        .result-box { background-color: var(--bg-input); border: 1px solid #444; border-radius: 8px; padding: 20px; height: 100%; }
+        .data-label { color: #888; font-size: 0.75em; text-transform: uppercase; margin-bottom: 2px; font-weight: bold; }
+        .data-value { font-family: 'Courier New', Courier, monospace; font-size: 1.05em; color: var(--accent-blue); margin-bottom: 12px; word-break: break-all; }
+        .data-value.highlight { color: var(--accent-purple); font-weight: bold; font-family: 'Segoe UI', sans-serif; }
+        
+        /* Drag & Drop Zones */
+        .drop-zone { border: 2px dashed #666; border-radius: 10px; padding: 40px 20px; text-align: center; background-color: rgba(0,0,0,0.2); cursor: pointer; transition: all 0.3s ease; }
+        .drop-zone:hover { border-color: #aaa; background-color: rgba(0,0,0,0.4); }
+        .drop-zone--over { border-color: var(--accent-green); background-color: rgba(40, 167, 69, 0.1); transform: scale(1.02); }
+        .drop-zone__prompt { color: #aaa; font-size: 1.1em; margin: 0; pointer-events: none; }
+        .drop-zone__icon { font-size: 2.5em; margin-bottom: 10px; color: #666; pointer-events: none; }
+        
+        /* Toast Notifications */
+        .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .custom-toast { min-width: 280px; max-width: 350px; background: #2c2c2c; color: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 8px 16px rgba(0,0,0,0.6); opacity: 0; transform: translateX(50px); transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); border-left: 6px solid #333; font-size: 0.9em; pointer-events: auto; }
+        .custom-toast.show { opacity: 1; transform: translateX(0); }
+        .custom-toast strong { font-size: 1.1em; display: block; margin-bottom: 3px; }
+        .toast-success { border-color: var(--accent-green); }
+        .toast-error { border-color: var(--accent-red); }
+        .toast-info { border-color: var(--accent-blue); }
+        .toast-warning { border-color: #ffc107; }
 
-    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
-    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/downloadjs/1.4.8/download.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/christopher-roelofs/maboii.js@main/maboii.js"></script>
+        /* Hide default DataTables search bar safely */
+        .dataTables_filter { display: none !important; }
+        
+        /* Responsive Tweaks */
+        @media (max-width: 768px) {
+            .tool-section { padding: 15px; }
+            .btn-group-responsive { display: flex; flex-direction: column; width: 100%; gap: 10px; }
+            .btn-group-responsive .btn { width: 100%; margin: 0 !important; border-radius: 4px !important; }
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid">
+        
         <div class="row mb-3">
             <div class="col-sm-12">
-                <div class="key-panel">
-                    <h6 class="text-muted small">ENCRYPTION SETTINGS & TOOLS</h6>
-                    <div class="d-flex align-items-center flex-wrap">
-                        <span id="keyStatus" class="badge badge-danger mr-3">Keys missing: Downloads will be decrypted</span>
-                        <input type="file" id="keyFileInput" accept=".bin" style="display: none;">
-                        <button class="btn btn-sm btn-outline-info" onclick="document.getElementById('keyFileInput').click()">Load key_retail.bin</button>
-                        <button id="clearKeysBtn" class="btn btn-sm btn-outline-warning ml-2" style="display:none;" onclick="clearKeys()">Clear Keys</button>
+                <div class="key-panel d-flex flex-column flex-md-row align-items-md-center justify-content-between">
+                    <div class="d-flex align-items-center flex-wrap mb-2 mb-md-0">
+                        <span id="keyStatus" class="badge badge-danger mr-3 mb-2 mb-md-0 py-2 px-3">Keys missing: Downloads will be decrypted</span>
                         
-                        <div class="ml-auto mt-2 mt-md-0">
-                            <a href="?tool=advanced" class="btn btn-sm btn-danger">Advanced Generator</a>
-                            <a href="?tool=encryptor" class="btn btn-sm btn-info ml-2">Amiibo Encryptor</a>
-                            <a href="?tool=analyzer" class="btn btn-sm btn-success ml-2">Amiibo Analyzer</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div id="advancedMode">
-            <h2 class="text-danger">Advanced amiibo Generator</h2>
-            <div class="row">
-                <div class="col-md-6">
-                    <label>Amiibo ID:</label>
-                    <input type="text" id="advId" class="form-control inputBox mb-3" placeholder="AABBCCDD00112233">
-                    
-                    <label>UID (9 bytes hex):</label>
-                    <div class="input-group mb-3">
-                        <input type="text" id="advUID" class="form-control inputBox" placeholder="04XXXXXXXXXXXXXX">
-                        <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" type="button" onclick="generateNewAdvUID()">Random</button>
-                        </div>
-                    </div>
-
-                    <label>Custom Signature (Text):</label>
-                    <input type="text" id="advSig" class="form-control inputBox mb-1" maxlength="32">
-                    
-                    <div class="custom-control custom-checkbox mb-3">
-                        <input type="checkbox" class="custom-control-input" id="advNoSig">
-                        <label class="custom-control-label text-muted" for="advNoSig" style="font-size: 0.9em;">
-                            Do not include signature (Generate exact 540-byte file)
-                        </label>
-                    </div>
-
-                    <button class="btn btn-danger btn-block" onclick="downloadAdvanced()">Download amiibo .bin</button>
-                    <a href="?" class="btn btn-link text-white mt-2">← Back to List</a>
-                </div>
-            </div>
-        </div>
-
-        <div id="encryptorMode">
-            <h2 class="text-info">Amiibo File Encryptor</h2>
-            <p class="small text-muted">Upload a decrypted .bin file to encrypt it using your loaded key_retail.bin</p>
-            <div class="row">
-                <div class="col-md-6">
-                    <label>Select Decrypted Amiibo (.bin):</label>
-                    <input type="file" id="encryptFileInput" accept=".bin" class="form-control-file mb-3 text-white">
-                    
-                    <button class="btn btn-info btn-block" onclick="processManualEncryption()">Encrypt & Download</button>
-                    <a href="?" class="btn btn-link text-white mt-2">← Back to List</a>
-                </div>
-            </div>
-        </div>
-        <div id="analyzerMode">
-                    <h2 class="text-success">Amiibo Analyzer & Extractor</h2>
-                    <p class="small text-muted">Upload a .bin file to extract its ID, UID, and signature. If encrypted, it will use your loaded keys (key_retail.bin) to decrypt it in memory and read it.</p>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <label>Select Amiibo File (.bin):</label>
-                            <input type="file" id="analyzeFileInput" accept=".bin" class="form-control-file mb-3 text-white">
-                            
-                            <button class="btn btn-success btn-block mb-3" onclick="processAnalyzer()">Analyze File</button>
-                            <a href="?" class="btn btn-link text-white mt-2">← Back to List</a>
-                        </div>
+                        <input type="file" id="keyRetailInput" accept=".bin" style="display: none;">
+                        <button class="btn btn-sm btn-outline-light mb-2 mb-md-0" onclick="document.getElementById('keyRetailInput').click()">
+                            🔑 Load key_retail.bin
+                        </button>
                         
-                        <div class="col-md-6">
-                            <div id="resultBox" class="result-box">
-                                <h5 class="text-white border-bottom border-secondary pb-2 mb-3">Analysis Results</h5>
-                                <div class="row">
-                                    <div class="col-sm-4 text-center">
-                                        <div class="analyzer-preview">
-                                            <img id="resImage" src="https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg" alt="Amiibo">
+                        <button id="clearKeysBtn" class="btn btn-sm btn-outline-warning ml-md-2 mb-2 mb-md-0" style="display:none;" onclick="clearKeys()">Clear Keys</button>
+                    </div>
+                    
+                    <div class="btn-group-responsive">
+                        <button onclick="switchTool('advanced')" class="btn btn-sm btn-danger">Advanced Generator</button>
+                        <button onclick="switchTool('encryptor')" class="btn btn-sm btn-info ml-md-2">Smart Crypto</button>
+                        <button onclick="switchTool('analyzer')" class="btn btn-sm btn-success ml-md-2">Deep Analyzer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="toolsContainer">
+            
+            <div id="advancedMode" class="tool-section">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-danger mb-0">Advanced amiibo Generator</h2>
+                    <button class="btn btn-outline-light btn-sm" onclick="switchTool('main')">✖ Close</button>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-4 mb-md-0">
+                        <label class="text-muted small">Amiibo ID (16 Hex):</label>
+                        <input type="text" id="advId" class="form-control mb-3" placeholder="AABBCCDD00112233" maxlength="16">
+                        
+                        <label class="text-muted small">Internal UID (9 Bytes Hex):</label>
+                        <div class="input-group mb-3">
+                            <input type="text" id="advUID" class="form-control" placeholder="04XXXXXXXXXXXXXX" maxlength="18">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button" onclick="generateNewAdvUID()">🎲 Random</button>
+                            </div>
+                        </div>
+
+                        <label class="text-muted small">Custom Signature (Text):</label>
+                        <input type="text" id="advSig" class="form-control mb-2" maxlength="32">
+                        
+                        <div class="custom-control custom-checkbox mb-4">
+                            <input type="checkbox" class="custom-control-input" id="advNoSig">
+                            <label class="custom-control-label text-muted small" for="advNoSig">
+                                Strict Mode: Generate exact 540-byte file (No Signature)
+                            </label>
+                        </div>
+
+                        <button class="btn btn-danger btn-block py-2 font-weight-bold" onclick="downloadAdvanced()">📥 Generate & Download</button>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div id="advPreviewBox" class="result-box" style="display: none; border-color: var(--accent-red);">
+                            <h6 class="text-white border-bottom border-secondary pb-2 mb-3">Target Detector</h6>
+                            <div class="text-center mt-4">
+                                <img id="advPreviewImage" src="https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg" class="mb-3 rounded shadow" style="max-height: 120px;">
+                                <h5 id="advPreviewName" class="text-success mb-1">---</h5>
+                                <span id="advPreviewSeries" class="badge badge-secondary">---</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="encryptorMode" class="tool-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="text-info mb-0">Smart Encryptor & Decryptor</h2>
+                    <button class="btn btn-outline-light btn-sm" onclick="switchTool('main')">✖ Close</button>
+                </div>
+                <p class="text-muted mb-4">Drag and drop any .bin file. The tool will auto-detect its state, process it, and prepare the converted file for download.</p>
+                
+                <div class="row">
+                    <div class="col-md-5 mb-4 mb-md-0">
+                        <div class="drop-zone h-100 d-flex flex-column justify-content-center" id="encryptorDropZone">
+                            <div class="drop-zone__icon">🔄</div>
+                            <span class="drop-zone__prompt">Drag & Drop an amiibo .bin file here<br><small>or click to browse</small></span>
+                            <input type="file" id="encryptFileInput" accept=".bin" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-7">
+                        <div id="cryptoResultBox" class="result-box" style="display: none; border-color: var(--accent-blue);">
+                            <h6 class="text-white border-bottom border-secondary pb-2 mb-3">Conversion Results</h6>
+                            <div class="row align-items-center">
+                                <div class="col-sm-4 text-center mb-3 mb-sm-0">
+                                    <img id="cryptoImage" src="https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg" class="img-fluid rounded mb-2 bg-dark p-1" style="max-height: 100px;">
+                                    <h6 id="cryptoName" class="text-white mb-0 small font-weight-bold">---</h6>
+                                </div>
+                                <div class="col-sm-8">
+                                    <div class="data-label">Original State</div>
+                                    <div id="cryptoStateBefore" class="mb-2"><span class="badge badge-secondary">---</span></div>
+                                    
+                                    <div class="data-label">New State</div>
+                                    <div id="cryptoStateAfter" class="mb-3"><span class="badge badge-secondary">---</span></div>
+                                    
+                                    <button id="btnDownloadCrypto" class="btn btn-info btn-block font-weight-bold shadow-sm" onclick="executeCryptoDownload()">📥 Download Converted File</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="cryptoWaitBox" class="result-box d-flex align-items-center justify-content-center text-muted" style="border-style: dashed;">
+                            Waiting for file...
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="analyzerMode" class="tool-section">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="text-success mb-0">Amiibo Deep Analyzer</h2>
+                    <button class="btn btn-outline-light btn-sm" onclick="switchTool('main')">✖ Close</button>
+                </div>
+                <p class="text-muted mb-4">Scan any .bin to verify encryption, extract internal IDs, read signatures, and extract AppData (Nickname & Mii Owner).</p>
+                
+                <div class="row">
+                    <div class="col-md-4 mb-4 mb-md-0">
+                        <div class="drop-zone h-100 d-flex flex-column justify-content-center" id="analyzerDropZone">
+                            <div class="drop-zone__icon">🔍</div>
+                            <span class="drop-zone__prompt">Drag & Drop a .bin file here<br><small>or click to browse</small></span>
+                            <input type="file" id="analyzeFileInput" accept=".bin" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-8">
+                        <div id="resultBox" class="result-box">
+                            <h6 class="text-white border-bottom border-secondary pb-2 mb-3">Scan Results</h6>
+                            <div class="row">
+                                <div class="col-sm-4 text-center mb-3 mb-sm-0">
+                                    <img id="resImage" src="https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg" class="img-fluid rounded mb-2 bg-dark p-1">
+                                    <h6 id="resName" class="text-white mb-0 small font-weight-bold">---</h6>
+                                    <small id="resSeries" class="text-muted d-block">---</small>
+                                </div>
+                                
+                                <div class="col-sm-8">
+                                    <div class="data-label">Security Status</div>
+                                    <div id="resStatus" class="mb-3"><span class="badge badge-secondary">Waiting for file...</span></div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="data-label">Amiibo ID</div>
+                                            <div id="resID" class="data-value small">...</div>
                                         </div>
-                                        <h6 id="resName" class="text-white mb-0">---</h6>
-                                        <small id="resSeries" class="text-muted">---</small>
+                                        <div class="col-6">
+                                            <div class="data-label">Internal UID</div>
+                                            <div id="resUID" class="data-value small">...</div>
+                                        </div>
                                     </div>
-                                    <div class="col-sm-8">
-                                        <div class="data-label">Original File Status</div>
-                                        <div id="resStatus" class="mb-3"><span class="badge badge-secondary">Analyzing...</span></div>
-        
-                                        <div class="data-label">Amiibo ID (Extracted)</div>
-                                        <div id="resID" class="data-value">...</div>
-        
-                                        <div class="data-label">Internal UID (9 bytes)</div>
-                                        <div id="resUID" class="data-value">...</div>
-        
-                                        <div class="data-label">Custom Signature (Text)</div>
-                                        <div id="resSigText" class="data-value mb-1 text-warning">...</div>
-                                        <div class="data-label">Signature (Hex)</div>
-                                        <div id="resSigHex" class="data-value" style="font-size: 0.85em; color: #666;">...</div>
+                                    
+                                    <div class="row border-top border-secondary pt-2 mt-1">
+                                        <div class="col-6">
+                                            <div class="data-label">👤 Mii Owner</div>
+                                            <div id="resMii" class="data-value highlight">...</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="data-label">🏷️ Amiibo Nickname</div>
+                                            <div id="resNickname" class="data-value highlight">...</div>
+                                        </div>
                                     </div>
+
+                                    <div class="data-label mt-1">Custom Signature</div>
+                                    <div id="resSigText" class="data-value small mb-0 text-warning">...</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-        <div id="mainContent">
-            <div class="row mb-4">
-                <div class="col-sm-12">
-                    <h2 class="mb-1">Amiibo Generator Pro</h2>
-                    <div class="hide_until_zipped">
-                        <button id="downloadamiiboZip" class="btn btn-sm btn-danger ml-2">Download All (amiibo ZIP)</button>
-                    </div>
+            </div>
+
+        </div> <div id="mainContent" class="tool-section" style="display: block; box-shadow: none; padding: 0; background: transparent;">
+            <div class="d-flex justify-content-between align-items-end mb-4 border-bottom border-secondary pb-3">
+                <div>
+                    <h2 class="mb-0">Database Explorer</h2>
+                    <small class="text-muted" id="dbStats">Initializing system...</small>
+                </div>
+                <div class="hide_until_zipped">
+                    <button id="downloadamiiboZip" class="btn btn-danger shadow-sm">📦 Download All (.zip)</button>
                 </div>
             </div>
             
-            <div class="row mb-3 align-items-end">
-                <div class="col-md-3">
-                    <label class="small text-muted">Group</label>
-                    <select id="filterGroup" class="form-control"></select>
+            <div class="row mb-3 bg-dark p-3 rounded mx-0 shadow-sm align-items-end">
+                <div class="col-md-2 mb-2 mb-md-0">
+                    <label class="small text-muted font-weight-bold">Origin</label>
+                    <select id="filterOrigin" class="form-control"></select>
                 </div>
-                <div class="col-md-3">
-                    <label class="small text-muted">Series</label>
+                <div class="col-md-2 mb-2 mb-md-0">
+                    <label class="small text-muted font-weight-bold">Format</label>
+                    <select id="filterType" class="form-control"></select>
+                </div>
+                <div class="col-md-2 mb-2 mb-md-0">
+                    <label class="small text-muted font-weight-bold">Amiibo Series</label>
                     <select id="filterSeries" class="form-control"></select>
                 </div>
+                <div class="col-md-2 mb-2 mb-md-0">
+                    <label class="small text-muted font-weight-bold">Game Series</label>
+                    <select id="filterGameSeries" class="form-control"></select>
+                </div>
                 <div class="col-md-4">
-                    <label class="small text-muted">Quick Search</label>
-                    <input type="text" id="input" class="form-control inputBox" placeholder="Name, ID, Group...">
+                    <label class="small text-muted font-weight-bold">Smart Search</label>
+                    <input type="text" id="input" class="form-control" placeholder="Search anything...">
                 </div>
             </div>
 
-            <div class="table-responsive">
-                <table id="dataTable" class="table table-striped table-bordered table-dark w-100">
-                    <thead>
+            <div class="table-responsive shadow-sm rounded">
+                <table id="dataTable" class="table table-striped table-hover table-dark w-100 mb-0">
+                    <thead class="thead-dark">
                         <tr>
                             <th>Image</th>
-                            <th>Name</th>
-                            <th>Amiibo ID</th>
+                            <th>Amiibo Name</th>
+                            <th>ID Code</th>
                             <th>Series</th>
-                            <th>Group</th>
-                            <th>Rel. EU</th>
-                            <th>Rel. NA</th>
-                            <th>Downloads</th>
+                            <th>Origin</th>
+                            <th>Releases</th>
+                            <th>Actions</th>
+                            <th>_GameSeries</th>
+                            <th>_Type</th>
                         </tr>
                     </thead> 
                     <tbody></tbody>            
@@ -199,6 +303,12 @@
         </div>
     </div>
     
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.5.0/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/christopher-roelofs/maboii.js@main/maboii.js"></script>
     <script src="script.js" type="text/javascript"></script>
 </body>
 </html>
