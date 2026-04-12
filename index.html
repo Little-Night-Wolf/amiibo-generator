@@ -111,50 +111,49 @@
                 </div>
             </div>
         </div>
-
         <div id="analyzerMode">
-            <h2 class="text-success">Amiibo Analyzer & Extractor</h2>
-            <p class="small text-muted">Sube un archivo .bin para extraer su ID, UID y firma. Si está encriptado, usará tus claves (key_retail.bin) para desencriptarlo en memoria y leerlo.</p>
-            <div class="row">
-                <div class="col-md-6">
-                    <label>Selecciona un archivo Amiibo (.bin):</label>
-                    <input type="file" id="analyzeFileInput" accept=".bin" class="form-control-file mb-3 text-white">
-                    
-                    <button class="btn btn-success btn-block mb-3" onclick="processAnalyzer()">Analizar Archivo</button>
-                    <a href="?" class="btn btn-link text-white mt-2">← Back to List</a>
-                </div>
-                
-                <div class="col-md-6">
-                    <div id="resultBox" class="result-box">
-                        <h5 class="text-white border-bottom border-secondary pb-2 mb-3">Resultados del Análisis</h5>
-                        <div class="row">
-                            <div class="col-sm-4 text-center">
-                                <div class="analyzer-preview">
-                                    <img id="resImage" src="https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg" alt="Amiibo">
+                    <h2 class="text-success">Amiibo Analyzer & Extractor</h2>
+                    <p class="small text-muted">Upload a .bin file to extract its ID, UID, and signature. If encrypted, it will use your loaded keys (key_retail.bin) to decrypt it in memory and read it.</p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Select Amiibo File (.bin):</label>
+                            <input type="file" id="analyzeFileInput" accept=".bin" class="form-control-file mb-3 text-white">
+                            
+                            <button class="btn btn-success btn-block mb-3" onclick="processAnalyzer()">Analyze File</button>
+                            <a href="?" class="btn btn-link text-white mt-2">← Back to List</a>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div id="resultBox" class="result-box">
+                                <h5 class="text-white border-bottom border-secondary pb-2 mb-3">Analysis Results</h5>
+                                <div class="row">
+                                    <div class="col-sm-4 text-center">
+                                        <div class="analyzer-preview">
+                                            <img id="resImage" src="https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg" alt="Amiibo">
+                                        </div>
+                                        <h6 id="resName" class="text-white mb-0">---</h6>
+                                        <small id="resSeries" class="text-muted">---</small>
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <div class="data-label">Original File Status</div>
+                                        <div id="resStatus" class="mb-3"><span class="badge badge-secondary">Analyzing...</span></div>
+        
+                                        <div class="data-label">Amiibo ID (Extracted)</div>
+                                        <div id="resID" class="data-value">...</div>
+        
+                                        <div class="data-label">Internal UID (9 bytes)</div>
+                                        <div id="resUID" class="data-value">...</div>
+        
+                                        <div class="data-label">Custom Signature (Text)</div>
+                                        <div id="resSigText" class="data-value mb-1 text-warning">...</div>
+                                        <div class="data-label">Signature (Hex)</div>
+                                        <div id="resSigHex" class="data-value" style="font-size: 0.85em; color: #666;">...</div>
+                                    </div>
                                 </div>
-                                <h6 id="resName" class="text-white mb-0">---</h6>
-                                <small id="resSeries" class="text-muted">---</small>
-                            </div>
-                            <div class="col-sm-8">
-                                <div class="data-label">Estado del Archivo Original</div>
-                                <div id="resStatus" class="mb-3"><span class="badge badge-secondary">Analizando...</span></div>
-
-                                <div class="data-label">Amiibo ID (Extraído)</div>
-                                <div id="resID" class="data-value">...</div>
-
-                                <div class="data-label">UID interno (9 bytes)</div>
-                                <div id="resUID" class="data-value">...</div>
-
-                                <div class="data-label">Firma Personalizada (Texto libre)</div>
-                                <div id="resSigText" class="data-value mb-1 text-warning">...</div>
-                                <div class="data-label">Firma (Hexadecimal)</div>
-                                <div id="resSigHex" class="data-value" style="font-size: 0.85em; color: #666;">...</div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
         <div id="mainContent">
             <div class="row mb-4">
                 <div class="col-sm-12">
