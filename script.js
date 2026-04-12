@@ -274,7 +274,7 @@ $(document).ready(async function() {
         if (amiiboId) {
             document.getElementById('advId').value = amiiboId.toUpperCase();
         } else {
-            document.getElementById('advId').value = ""; // Manual entry
+            document.getElementById('advId').value = ""; 
         }
         document.getElementById('advSig').value = DEFAULT_SIG_TEXT;
         generateNewAdvUID();
@@ -286,11 +286,14 @@ $(document).ready(async function() {
     }
 
     try {
-        const [apiRes] = await Promise.all([
-            fetch("https://amiiboapi.org/api/amiibo/").then(r => r.json())
+        // Cargamos ambas fuentes de datos simultáneamente
+        const [apiRes, extraRes] = await Promise.all([
+            fetch("https://amiiboapi.org/api/amiibo/").then(r => r.json()).catch(() => ({ amiibo: [] })),
+            fetch("extras.json").then(r => r.json()).catch(() => ({ amiibo: [] }))
         ]);
 
-        amiiboDatabase = apiRes.amiibo.map(ami => ({
+        // Combinamos los datos de la API
+        const apiData = apiRes.amiibo.map(ami => ({
             id: (ami.head + ami.tail).toUpperCase(),
             name: ami.name,
             series: ami.amiiboSeries,
@@ -299,6 +302,20 @@ $(document).ready(async function() {
             relNA: ami.release?.na || "-",
             image: ami.image
         }));
+
+        // Combinamos los datos de Extras (usando customGroup si existe)
+        const extraData = extraRes.amiibo.map(ami => ({
+            id: (ami.head + ami.tail).toUpperCase(),
+            name: ami.name,
+            series: ami.amiiboSeries,
+            group: ami.customGroup || "Extra",
+            relEU: "-",
+            relNA: "-",
+            image: ami.image || ""
+        }));
+
+        // Base de datos final unificada
+        amiiboDatabase = [...apiData, ...extraData];
 
         amiiboDatabase.forEach(amiibo => {
             const safeName = amiibo.name.replace(/'/g, "\\'");
@@ -314,7 +331,7 @@ $(document).ready(async function() {
                 </div>`;
             
             mainTable.row.add([
-                `<div class="amiibo-image"><img src="${amiibo.image}"></div>`,
+                `<div class="amiibo-image"><img src="${amiibo.image}" onerror="this.src='https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg'"></div>`,
                 amiibo.name,
                 `<code>${amiibo.id}</code>`,
                 amiibo.series,
@@ -326,15 +343,18 @@ $(document).ready(async function() {
         });
         mainTable.draw();
 
+        // Actualizar filtros
         const series = [...new Set(amiiboDatabase.map(a => a.series))].sort();
-        $('#filterSeries').append(new Option("All", ""));
+        $('#filterSeries').empty().append(new Option("All", ""));
         series.forEach(s => $('#filterSeries').append(new Option(s, s)));
 
         $('#input').on('keyup', function() { mainTable.search(this.value).draw(); });
         $('#filterSeries').on('change', function() { mainTable.column(3).search(this.value).draw(); });
 
         $(".hide_until_zipped").show();
-        $("#downloadamiiboZip").on("click", () => generateZip('amiibo'));
+        $("#downloadamiiboZip").off("click").on("click", () => generateZip('amiibo'));
 
-    } catch (err) { console.error("Loading error:", err); }
+    } catch (err) { 
+        console.error("Loading error:", err); 
+    }
 });
