@@ -12,17 +12,6 @@
       "customGroup": "Leaked"
     },
     {
-	  "amiiboSeries": "Super Nintendo World",
-	  "character": "Daisy",
-	  "gameSeries": "Super Mario",
-	  "head": "00130003",
-	  "image": "https://raw.githubusercontent.com/8bitDream/AmiiboAPI/master/images/icon_00130003-039eff02.png",
-	  "name": "Daisy - Power Up Band",
-	  "tail": "039eff02",
-	  "type": "Band",
-      "customGroup": "TEST"
-	},
-    {
       "amiiboSeries": "TEST",
       "character": "TEST",
       "gameSeries": "TEST",
