@@ -522,7 +522,9 @@ function formatChildRow(entry) {
         <div class="col-md-4 mb-2">
             <div class="card bg-secondary text-white border-0 shadow-sm">
                 <div class="card-body p-3">
-                    <img loading="lazy" src="${src.image}" onerror="this.src='https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg'">
+                    <div class="amiibo-image">
+                        <img loading="lazy" src="${src.image}" onerror="this.src='https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg'">
+                    </div>
                     <span class="badge badge-dark float-right">${src.origin}</span>
                     <strong class="d-block mb-1">${src.name}</strong>
                     <small class="d-block text-light mb-1">Series: ${src.series}</small>
