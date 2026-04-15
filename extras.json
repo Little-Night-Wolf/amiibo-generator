@@ -8,6 +8,12 @@
       "tail": "04A70902",
       "image": "https://amiibo.life/assets/figures/amiibo/the-legend-of-zelda/mineru-s-construct-97ed7d1010558ea1449e71e89499ce1845c5f4d9884728a6b17384cf30a2d2de.png",
       "name": "Mineru's Construct",
+      "release": {
+				"au": null,
+				"eu": null,
+				"jp": null,
+				"na": null
+			},
       "type": "Figure",
       "customGroup": "Leaked"
     },
@@ -17,11 +23,14 @@
       "gameSeries": "Super Mario",
       "head": "00000003",
       "tail": "039bff02",
-      "image": "",
+      "image": "https://amiibo.life/assets/figures/amiibo/super-nintendo-world/invincible-power-up-band-cb85da95972b82131669aca187f1720ae20e5ceff1d8d7cfd211a5a50579f4fd.png",
       "name": "Invencible - Power Up Band",
       "release": {
-        "jp":"2026-03-18"
-      },
+				"au": null,
+				"eu": null,
+				"jp": "2026-03-18",
+				"na": null
+			},
       "type": "Band",
       "customGroup": "Recolor"
     }
