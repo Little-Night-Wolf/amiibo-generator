@@ -6,7 +6,7 @@
       "gameSeries": "The Legend of Zelda",
       "head": "010D0000",
       "tail": "04A70902",
-      "image": "/extra-images/mineru-s-construct.png",
+      "image": "extra-images/mineru-s-construct.png",
       "name": "Mineru's Construct",
       "release": {
 				"au": null,
@@ -23,7 +23,7 @@
       "gameSeries": "Super Mario",
       "head": "00000003",
       "tail": "039bff02",
-      "image": "/extra-images/invincible-power-up-band.png",
+      "image": "extra-images/invincible-power-up-band.png",
       "name": "Invencible - Power Up Band",
       "release": {
 				"au": null,
