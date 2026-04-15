@@ -12,7 +12,7 @@ const API_CONFIGS = [
         name: "amiiboapi.org", 
         url: "https://amiiboapi.org/api/amiibo/",
         extractData: (json) => json.amiibo || [],
-        extractOrigin: (item) => "API",
+        extractOrigin: (item) => "amiiboapi.org",
         mapData: (item) => ({
             id: ((item.head || "") + (item.tail || "")).toUpperCase(),
             name: item.name || "Unknown",
