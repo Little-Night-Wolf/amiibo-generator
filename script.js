@@ -609,6 +609,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 console.log(`✅ ${config.name} loaded. (Items: ${itemsList.length})`);
             } catch (err) {
                 console.warn(`⚠️ Warning: Failed to load data from ${config.name}`, err);
+                alert(`⚠️ Warning: Failed to load data from ${config.name}`);
             }
         }
 
