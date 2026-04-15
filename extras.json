@@ -12,15 +12,18 @@
       "customGroup": "Leaked"
     },
     {
-      "amiiboSeries": "TEST",
-      "character": "TEST",
-      "gameSeries": "TEST",
-      "head": "00000000",
-      "tail": "00000000",
+      "amiiboSeries": "Super Nintendo World",
+      "character": "Mario",
+      "gameSeries": "Super Mario",
+      "head": "00000003",
+      "tail": "0430ff02",
       "image": "",
-      "name": "TEST",
-      "type": "TEST",
-      "customGroup": "TEST"
+      "name": "Invencible - Power Up Band",
+      "release": {
+        "jp":"2026-03-18"
+      },
+      "type": "Band",
+      "customGroup": "Recolor"
     }
   ]
 }
