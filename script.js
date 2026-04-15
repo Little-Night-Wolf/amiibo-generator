@@ -515,22 +515,37 @@ const formatReleases = (release) => {
 };
 
 // Formatting function for Duplicate Amiibo dropdowns
-function formatChildRow(entry) {
-    let html = '<div class="p-3 bg-dark rounded border border-secondary" style="margin: 5px 0;"><h6 class="text-info mb-3">Available Versions / Sources</h6><div class="row">';
-    entry.sources.forEach(src => {
+function format(d) {
+    // 'd' is the original row data object
+    let html = '<div class="p-3" style="background: #1a1a1a; border-top: 2px solid #444;">';
+    html += '<p class="text-muted small mb-3">Found in multiple databases (Variants):</p>';
+    html += '<div class="row">';
+
+    // Loop through the duplicates array we built during data merging
+    d.duplicates.forEach(item => {
         html += `
-        <div class="col-md-4 mb-2">
-            <div class="card bg-secondary text-white border-0 shadow-sm">
-                <div class="card-body p-3">
-                    <span class="badge badge-dark float-right">${src.origin}</span>
-                    <strong class="d-block mb-1">${src.name}</strong>
-                    <small class="d-block text-light mb-1">Series: ${src.series}</small>
-                    <small class="d-block text-light mb-3">Type: ${src.type}</small>
-                    <button class="btn btn-sm btn-danger btn-block font-weight-bold" onclick="downloadSingle('amiibo','${src.name.replace(/'/g, "\\'")}','${entry.id}')">Download Version</button>
+        <div class="col-md-4 col-sm-6 mb-2">
+            <div class="d-flex align-items-center p-2 rounded border border-secondary" style="background: rgba(255,255,255,0.03)">
+                <div class="mr-3">
+                    <img src="${item.image}" 
+                         alt="${item.name}" 
+                         style="width: 50px; height: 50px; object-fit: contain; background: #000; border-radius: 4px; border: 1px solid #555;"
+                         onerror="this.src='https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg'">
+                </div>
+                <div style="flex-grow: 1; min-width: 0;">
+                    <div class="small font-weight-bold text-white text-truncate">${item.name}</div>
+                    <div class="text-info" style="font-size: 0.7rem;">Source: ${item.origin}</div>
+                    <div class="text-muted" style="font-size: 0.65rem;">ID: ${item.id}</div>
+                </div>
+                <div class="ml-2">
+                    <button onclick="switchTool('advanced', '${item.id}')" class="btn btn-sm btn-danger py-0 px-2" style="font-size: 0.65rem;">
+                        USE
+                    </button>
                 </div>
             </div>
         </div>`;
     });
+
     html += '</div></div>';
     return html;
 }
