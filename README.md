@@ -37,7 +37,7 @@ By leveraging databases like **AmiiboAPI** and community research from projects 
 ## 🛠️ Usage & Compatibility Guide
 
 ### ⚠️ Important Disclaimer
-If you don't provide this tool a working `key_retail.bin` files will be **unencrypted** wich means that is useless in some situations, so if you don't encrypt the generated amiibos from this tool in order to properly use this amiibos you will need to use anotheer app.
+If you don't provide this tool a working `key_retail.bin` files will be **unencrypted** wich means that is useless in some situations, so if you don't encrypt the generated amiibos from this tool in order to properly use this amiibos you will need to use another app.
 
 ### External apps to encrypt/modify the amiibos
 
