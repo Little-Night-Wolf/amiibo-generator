@@ -19,9 +19,10 @@ Real Amiibos utilize the **NXP NTAG215** standard, a memory-rich NFC tag with 54
 ### 2. How this Generator Works
 By leveraging databases like **AmiiboAPI** and community research from projects like **TagMo**, we can reconstruct a character's "digital DNA".
 1.  **ID Injection:** The tool takes the character's Head and Tail IDs and places them at specific offsets (typically `0x54` and `0x1DC`).
-2.  **Format Adaptation:** * **Wumiibo:** Generates a 540-byte structure optimized for the 3DS custom firmware.
+2.  **Format Adaptation:**
+    * **Wumiibo:** Generates a 540-byte structure optimized for the 3DS custom firmware.
     * **Foomiibo:** Generates a 572-byte structure (including the TagMo signature) used by modern emulation tools.
-3.  **BCC Calculation:** The script automatically calculates the internal checksums required for the NFC controller to accept the dump as a valid NTAG215.
+4.  **BCC Calculation:** The script automatically calculates the internal checksums required for the NFC controller to accept the dump as a valid NTAG215.
 
 ---
 
