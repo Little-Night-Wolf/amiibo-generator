@@ -38,6 +38,22 @@ const API_CONFIGS = [
             releases: formatReleases(item.release),
             image: item.image || "https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg"
         })
+    },
+    {
+        id: "main_api_backup",
+        name: "amiiboapi.org backup", 
+        url: "amiibo.json",
+        extractData: (json) => json.amiibo || [],
+        extractOrigin: (item) => "amiiboapi.org backup",
+        mapData: (item) => ({
+            id: ((item.head || "") + (item.tail || "")).toUpperCase(),
+            name: item.name || "Unknown",
+            series: item.amiiboSeries || "-",
+            gameSeries: item.gameSeries || "-",
+            type: item.type || "Figure",
+            releases: formatReleases(item.release),
+            image: item.image || "https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg"
+        })
     }
     // Future Example:
     // { url: "new-api.com/data", extractData: (json) => json.results, extractOrigin: () => "NewAPI", mapData: (item) => ({ id: item.rawId.replace("0x", ""), name: item.title ... }) }
