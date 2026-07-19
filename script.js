@@ -582,8 +582,22 @@ document.addEventListener('DOMContentLoaded', async function() {
 
         for (const config of API_CONFIGS) {
             try {
-                const response = await fetch(config.url);
-                if(!response.ok) throw new Error("HTTP " + response.status);
+                let response;
+                try {
+                    response = await fetch(config.url);
+                    if(!response.ok) throw new Error("HTTP " + response.status);
+                } catch (fetchErr) {
+                    if (config.url.startsWith("https://")) {
+                        console.warn(`[API Fallback] Error fetching ${config.url} via HTTPS:`, fetchErr);
+                        console.log(`[API Fallback] Attempting fallback to HTTP for ${config.name}...`);
+                        alert(`⚠️ Warning: Failed to load data from ${config.name} via HTTPS.\nRetrying with HTTP...`);
+                        const fallbackUrl = config.url.replace("https://", "http://");
+                        response = await fetch(fallbackUrl);
+                        if(!response.ok) throw new Error("HTTP " + response.status + " on fallback");
+                    } else {
+                        throw fetchErr;
+                    }
+                }
                 
                 const rawJson = await response.json();
                 const itemsList = config.extractData(rawJson);
