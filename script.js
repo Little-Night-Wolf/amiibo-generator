@@ -39,6 +39,7 @@ const API_CONFIGS = [
             image: item.image || "https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg"
         })
     },
+    /*
     {
         id: "main_api_backup",
         name: "amiiboapi.org backup", 
@@ -54,7 +55,8 @@ const API_CONFIGS = [
             releases: formatReleases(item.release),
             image: item.image || "https://raw.githubusercontent.com/Little-Night-Wolf/amiibo-generator/main/favicon.svg"
         })
-    }
+    }*/
+    
     // Future Example:
     // { url: "new-api.com/data", extractData: (json) => json.results, extractOrigin: () => "NewAPI", mapData: (item) => ({ id: item.rawId.replace("0x", ""), name: item.title ... }) }
 ];
